@@ -29,8 +29,5 @@ export default defineConfig(async () => ({
       // 3. tell vite to ignore watching `src-tauri`
       ignored: ["**/src-tauri/**"],
     },
-    alias: {
-      "@": fileURLToPath(new URL("./src", import.meta.url)),
-    },
   },
 }));
