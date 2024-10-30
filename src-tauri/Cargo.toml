@@ -1,9 +1,9 @@
 [package]
 name = "vapp"
 version = "0.1.0"
-description = "A Tauri App"
-authors = ["Vasak Group"]
-edition = "2024"
+description = "A Vasak Application (template)"
+authors = ["Vasak Group", "Joaquin (Pato) Decima"]
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -22,6 +22,12 @@ tauri = { version = "2", features = [] }
 tauri-plugin-shell = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+#gtk4 = { version = "0.9.2", features = ["v4_2"] }
+
+[dependencies.gtk]
+package = "gtk4"
+version = "0.9.2"
+features = ["v4_2"]
 
 [profile.dev]
 incremental = true # Compile your binary in smaller steps.
