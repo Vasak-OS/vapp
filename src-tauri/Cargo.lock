@@ -3645,6 +3645,7 @@ dependencies = [
 name = "vapp"
 version = "0.1.0"
 dependencies = [
+ "base64 0.21.7",
  "gtk",
  "serde",
  "serde_json",
