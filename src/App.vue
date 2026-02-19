@@ -1,23 +1,36 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, Ref, ref } from "vue";
-import { useConfigStore } from "@vasakgroup/plugin-config-manager";
-import WindowLayout from "@/layouts/WindowLayout.vue";
-import { listen } from "@tauri-apps/api/event";
+/** biome-ignore-all lint/correctness/noUnusedImports: <Use in template> */
 
-const configStore = useConfigStore();
-let unlistenConfig: Ref<Function | null> = ref(null);
+import { listen, type UnlistenFn } from '@tauri-apps/api/event';
+import { useConfigStore } from '@vasakgroup/plugin-config-manager';
+import type { Store } from 'pinia';
+import { onMounted, onUnmounted, type Ref, ref } from 'vue';
+import WindowLayout from '@/layouts/WindowLayout.vue';
+
+let unListenConfig: Ref<UnlistenFn | null> = ref(null);
 
 onMounted(async () => {
-  configStore.loadConfig();
-  unlistenConfig.value = await listen("config-changed", async () => {
-    configStore.loadConfig();
-  });
+	try {
+		const configStore = useConfigStore() as Store<
+			'config',
+			{ config: any; loadConfig: () => Promise<void> }
+		>;
+		await configStore.loadConfig();
+
+		unListenConfig.value = await listen('config-changed', async () => {
+			document.startViewTransition(() => {
+				configStore.loadConfig();
+			});
+		});
+	} catch (error: any) {
+		console.error('Error al cargar configuración en App.vue', error);
+	}
 });
 
 onUnmounted(() => {
-  if (unlistenConfig.value !== null) {
-    unlistenConfig.value();
-  }
+	if (unListenConfig.value !== null) {
+		unListenConfig.value();
+	}
 });
 </script>
 

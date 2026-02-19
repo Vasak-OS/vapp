@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { WindowFrame } from "@vasakgroup/vue-libvasak";
+/** biome-ignore-all lint/correctness/noUnusedImports: <Use in template> */
+import { WindowFrame } from '@vasakgroup/vue-libvasak';
 </script>
 <template>
     <WindowFrame class="flex rounded-t-window bg-vsk-primary justify-between items-center h-6 h-8 inline-block px-4 py-1">
