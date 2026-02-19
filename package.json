@@ -4,10 +4,13 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build",
-    "preview": "vite preview",
-    "tauri": "tauri"
+    "dev": "bunx --bun vite",
+    "build": "bunx --bun vue-tsc --noEmit && bunx --bun vite build",
+    "preview": "bunx --bun vite preview",
+    "tauri": "tauri",
+    "lint": "bunx --bun biome check .",
+    "lint:fix": "bunx --bun biome check --write . && bunx --bun biome format --write .",
+    "format": "bunx --bun biome format --write ."
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.0",
@@ -21,6 +24,7 @@
     "vue": "^3.5.28"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.3",
     "@tailwindcss/postcss": "^4.2.0",
     "@tauri-apps/cli": "^2.10.0",
     "@types/node": "^25.3.0",
