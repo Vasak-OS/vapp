@@ -1,8 +1,10 @@
 @import "tailwindcss";
 
 :root {
-  --primary-color: #1d4ed8;
+  --primary-color: #f5a97f;
   --border-radius: 10px;
+  --dark-bg-color: #24273a;
+  --light-bg-color: #eff1f5;
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -11,14 +13,24 @@
   --radius-vsk: var(--border-radius);
   --radius-window: calc(var(--border-radius) + 16px);
   --color-vsk-primary: var(--primary-color);
+  --color-dark: var(--dark-bg-color);
+  --color-light: var(--light-bg-color);
+}
+
+::view-transition-old(root) {
+  animation-delay: 500ms;
+}
+
+::view-transition-new(root) {
+  animation: circle-in 500ms;
 }
 
 body * {
-  @apply text-gray-900 dark:text-gray-100 transition-all duration-300;
+  @apply text-gray-900 dark:text-gray-100 transition-colors duration-300;
 }
 
 .background {
-  @apply bg-white/70 dark:bg-black/70;
+  @apply bg-light/80 dark:bg-dark/80;
 }
 
 @layer base {
