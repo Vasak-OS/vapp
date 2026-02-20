@@ -1,20 +1,120 @@
 @import "tailwindcss";
 
 :root {
-  --primary-color: #f5a97f;
-  --border-radius: 10px;
-  --dark-bg-color: #24273a;
-  --light-bg-color: #eff1f5;
+  /* general */
+  --corner-radius: 10px;
+
+  /* Colores de Marca */
+  --primary: #dd7878;
+  --secondary: #8839ef;
+  --primary-dark: #eba0ac;
+  --secondary-dark: #cba6f7;
+
+  /* Colores de Interfaz (UI) */
+  --ui-background: #eff1f5;
+  --ui-surface: #ccd0da;
+  --ui-border: #dce0e8;
+  --ui-background-dark: #1e1e2e;
+  --ui-surface-dark: #313244;
+  --ui-border-dark: #11111b;
+
+  /* Colores de Texto */
+  --text-main: #4c4f69;
+  --text-muted: #6c6f85;
+  --text-on-primary: #5c5f77;
+  --text-main-dark: #cdd6f4;
+  --text-muted-dark: #a6adc8;
+  --text-on-primary-dark: #cdd6f4;
+
+  /* Status */
+  --status-error: #d20f39;
+  --status-success: #40a02b;
+  --status-warning: #df8e1d;
+  --status-error-dark: #f38ba8;
+  --status-success-dark: #a6e3a1;
+  --status-warning-dark: #f9e2af;
+
+  /* Terminal Colors */
+  --terminal-foreground: #4c4f69;
+  --terminal-background: #eff1f5;
+  --terminal-cursor: #dd7878;
+  --terminal-foreground-dark: #dddddd;
+  --terminal-background-dark: #1a1a1a;
+  --terminal-cursor-dark: #d4885c;
+
+  --terminal-ansi-black: #4c4f69;
+  --terminal-ansi-red: #d20f39;
+  --terminal-ansi-green: #40a02b;
+  --terminal-ansi-yellow: #df8e1d;
+  --terminal-ansi-blue: #1e66f5;
+  --terminal-ansi-magenta: #8839ef;
+  --terminal-ansi-cyan: #04a5e5;
+  --terminal-ansi-white: #e6e9ef;
+
+  --terminal-ansi-bright-black: #4c4f69;
+  --terminal-ansi-bright-red: #d20f39;
+  --terminal-ansi-bright-green: #40a02b;
+  --terminal-ansi-bright-yellow: #df8e1d;
+  --terminal-ansi-bright-blue: #1e66f5;
+  --terminal-ansi-bright-magenta: #8839ef;
+  --terminal-ansi-bright-cyan: #04a5e5;
+  --terminal-ansi-bright-white: #e6e9ef;
+
+  --terminal-ansi-black-dark: #181825;
+  --terminal-ansi-red-dark: #f38ba8;
+  --terminal-ansi-green-dark: #a6e3a1;
+  --terminal-ansi-yellow-dark: #f9e2af;
+  --terminal-ansi-blue-dark: #89b4fa;
+  --terminal-ansi-magenta-dark: #eba0ac;
+  --terminal-ansi-cyan-dark: #89dceb;
+  --terminal-ansi-white-dark: #cdd6f4;
+
+  --terminal-ansi-bright-black-dark: #181825;
+  --terminal-ansi-bright-red-dark: #f38ba8;
+  --terminal-ansi-bright-green-dark: #a6e3a1;
+  --terminal-ansi-bright-yellow-dark: #f9e2af;
+  --terminal-ansi-bright-blue-dark: #89b4fa;
+  --terminal-ansi-bright-magenta-dark: #eba0ac;
+  --terminal-ansi-bright-cyan-dark: #89dceb;
+  --terminal-ansi-bright-white-dark: #cdd6f4;
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --radius-vsk: var(--border-radius);
-  --radius-window: calc(var(--border-radius) + 16px);
-  --color-vsk-primary: var(--primary-color);
-  --color-dark: var(--dark-bg-color);
-  --color-light: var(--light-bg-color);
+   /* radius */
+  --radius-corner: var(--corner-radius);
+  --radius-corner-window: calc(var(--corner-radius) + 16px);
+
+  /* Colores de Marca */
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-primary-dark: var(--primary-dark);
+  --color-secondary-dark: var(--secondary-dark);
+
+  /* Colores de Interfaz (UI) */
+  --color-ui-bg: var(--ui-background);
+  --color-ui-surface: var(--ui-surface);
+  --color-ui-border: var(--ui-border);
+  --color-ui-bg-dark: var(--ui-background-dark);
+  --color-ui-surface-dark: var(--ui-surface-dark);
+  --color-ui-border-dark: var(--ui-border-dark);
+
+  /* Colores de Texto */
+  --color-tx-main: var(--text-main);
+  --color-tx-muted: var(--text-muted);
+  --color-tx-on-primary: var(--text-on-primary);
+  --color-tx-main-dark: var(--text-main-dark);
+  --color-tx-muted-dark: var(--text-muted-dark);
+  --color-tx-on-primary-dark: var(--text-on-primary-dark);
+
+  /* Status */
+  --color-status-error: var(--status-error);
+  --color-status-success: var(--status-success);
+  --color-status-warning: var(--status-warning);
+  --color-status-error-dark: var(--status-error-dark);
+  --color-status-success-dark: var(--status-success-dark);
+  --color-status-warning-dark: var(--status-warning-dark);
 }
 
 ::view-transition-old(root) {
@@ -26,11 +126,11 @@
 }
 
 body * {
-  @apply text-gray-900 dark:text-gray-100 transition-colors duration-300;
+  @apply text-tx-main dark:text-tx-main-dark transition-colors duration-300;
 }
 
 .background {
-  @apply bg-light/80 dark:bg-dark/80;
+  @apply bg-ui-bg/80 dark:bg-ui-bg-dark/80;
 }
 
 @layer base {
