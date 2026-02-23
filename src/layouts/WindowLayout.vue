@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-/** biome-ignore-all lint/correctness/noUnusedImports: <Use in template> */
 import { WindowFrame } from '@vasakgroup/vue-libvasak';
 </script>
 <template>
