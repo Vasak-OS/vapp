@@ -82,39 +82,48 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-   /* radius */
+  /* radius */
   --radius-corner: var(--corner-radius);
   --radius-corner-window: calc(var(--corner-radius) + 2px);
 
-  /* Colores de Marca */
+  /* Colores de Marca - responsive a dark mode */
   --color-primary: var(--primary);
   --color-secondary: var(--secondary);
-  --color-primary-dark: var(--primary-dark);
-  --color-secondary-dark: var(--secondary-dark);
 
-  /* Colores de Interfaz (UI) */
+  /* Colores de Interfaz (UI) - responsive a dark mode */
   --color-ui-bg: var(--ui-background);
   --color-ui-surface: var(--ui-surface);
   --color-ui-border: var(--ui-border);
-  --color-ui-bg-dark: var(--ui-background-dark);
-  --color-ui-surface-dark: var(--ui-surface-dark);
-  --color-ui-border-dark: var(--ui-border-dark);
 
-  /* Colores de Texto */
+  /* Colores de Texto - responsive a dark mode */
   --color-tx-main: var(--text-main);
   --color-tx-muted: var(--text-muted);
   --color-tx-on-primary: var(--text-on-primary);
-  --color-tx-main-dark: var(--text-main-dark);
-  --color-tx-muted-dark: var(--text-muted-dark);
-  --color-tx-on-primary-dark: var(--text-on-primary-dark);
 
-  /* Status */
+  /* Status - responsive a dark mode */
   --color-status-error: var(--status-error);
   --color-status-success: var(--status-success);
   --color-status-warning: var(--status-warning);
-  --color-status-error-dark: var(--status-error-dark);
-  --color-status-success-dark: var(--status-success-dark);
-  --color-status-warning-dark: var(--status-warning-dark);
+}
+
+/* Override colors in dark mode */
+@layer theme {
+  :root,
+  :host {
+    @variant dark {
+      --color-primary: var(--primary-dark);
+      --color-secondary: var(--secondary-dark);
+      --color-ui-bg: var(--ui-background-dark);
+      --color-ui-surface: var(--ui-surface-dark);
+      --color-ui-border: var(--ui-border-dark);
+      --color-tx-main: var(--text-main-dark);
+      --color-tx-muted: var(--text-muted-dark);
+      --color-tx-on-primary: var(--text-on-primary-dark);
+      --color-status-error: var(--status-error-dark);
+      --color-status-success: var(--status-success-dark);
+      --color-status-warning: var(--status-warning-dark);
+    }
+  }
 }
 
 ::view-transition-old(root) {
@@ -126,11 +135,11 @@
 }
 
 body * {
-  @apply text-tx-main dark:text-tx-main-dark transition-colors duration-300;
+  @apply text-tx-main transition-colors duration-300;
 }
 
 .background {
-  @apply bg-ui-bg/80 dark:bg-ui-bg-dark/80;
+  @apply bg-ui-bg/80;
 }
 
 @layer base {
