@@ -3,7 +3,7 @@ import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { useConfigStore } from '@vasakgroup/plugin-config-manager';
 import type { Store } from 'pinia';
 import { onMounted, onUnmounted, type Ref, ref } from 'vue';
-import WindowLayout from '@/layouts/WindowLayout.vue';
+import WindowAppLayout from '@/layouts/WindowAppLayout.vue';
 
 let unListenConfig: Ref<UnlistenFn | null> = ref(null);
 
@@ -33,5 +33,5 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <WindowLayout> VAPP </WindowLayout>
+  <WindowAppLayout />
 </template>
