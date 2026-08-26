@@ -35,20 +35,36 @@ fn cargar(idioma: &str) -> serde_yaml::Value {
 /// Todas las claves como `grupo.clave`, con su texto.
 fn textos(valor: &serde_yaml::Value) -> BTreeMap<String, String> {
     let mut salida = BTreeMap::new();
-    if let serde_yaml::Value::Mapping(grupos) = valor {
-        for (grupo, contenido) in grupos {
-            let grupo = grupo.as_str().unwrap_or_default();
-            if let serde_yaml::Value::Mapping(claves) = contenido {
-                for (clave, texto) in claves {
-                    salida.insert(
-                        format!("{grupo}.{}", clave.as_str().unwrap_or_default()),
-                        texto.as_str().unwrap_or_default().to_string(),
-                    );
-                }
+    recorrer(valor, "", &mut salida);
+    salida
+}
+
+/// Aplana el catálogo a `grupo.subgrupo.clave`, a cualquier profundidad.
+///
+/// Recursivo y no de dos niveles fijos, que es como estaba. Un grupo anidado más
+/// abajo quedaba **sin comprobar** y además aparecía como un texto vacío, porque un
+/// mapeo no es una cadena: el test fallaba justo donde no miraba. Lo encontró
+/// vasak-monitor al agrupar sus tareas de limpieza en un tercer nivel.
+fn recorrer(valor: &serde_yaml::Value, prefijo: &str, salida: &mut BTreeMap<String, String>) {
+    match valor {
+        serde_yaml::Value::Mapping(mapa) => {
+            for (clave, hijo) in mapa {
+                let nombre = clave.as_str().unwrap_or_default();
+                let completa = if prefijo.is_empty() {
+                    nombre.to_string()
+                } else {
+                    format!("{prefijo}.{nombre}")
+                };
+                recorrer(hijo, &completa, salida);
             }
         }
+        serde_yaml::Value::String(texto) => {
+            salida.insert(prefijo.to_string(), texto.clone());
+        }
+        // Un número o un booleano en un catálogo de textos es un error de tipeo,
+        // pero no es un texto vacío: se ignora en lugar de fallar por él.
+        _ => {}
     }
-    salida
 }
 
 /// Los marcadores `{n}` **cerrados** de un texto, conservando repeticiones.

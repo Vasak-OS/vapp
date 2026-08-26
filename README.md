@@ -43,6 +43,22 @@ bunx --bun tauri dev
 
 ## Lo que ya viene resuelto, y por qué
 
+### El marco de la ventana
+
+`WindowAppLayout` recibe el contenido en un `slot`, así que la aplicación va
+adentro:
+
+```vue
+<WindowAppLayout>
+  <MiContenido />
+</WindowAppLayout>
+```
+
+Sin ese `slot` —que es como estaba— el layout **descartaba en silencio** todo lo
+que se le pusiera dentro y la ventana abría vacía con el relleno de la plantilla
+todavía puesto. No hay ningún error: simplemente no aparece nada, y en
+vasak-monitor costó una compilación y una captura darse cuenta.
+
 ### Idioma de la sesión
 
 `src-tauri/src/locales.rs` resuelve dos cosas que se rompen calladas:
@@ -146,7 +162,10 @@ La plantilla trae los dos lados armados:
 
 - `tests/interpolar.test.ts` — la interpolación, con los tres casos del `$`.
 - `src-tauri/tests/locales.rs` — que los catálogos parseen, tengan las mismas
-  claves, ningún texto vacío y los marcadores coincidan.
+  claves, ningún texto vacío y los marcadores coincidan. Recorre el árbol
+  **completo**: cuando sólo bajaba dos niveles, un grupo anidado más abajo quedaba
+  sin comprobar y encima aparecía como texto vacío, porque un mapeo no es una
+  cadena — el test fallaba justo donde no miraba.
 - `src-tauri/src/locales.rs` — la detección de idioma.
 
 **Verificá que un test sirve reintroduciendo el bug a propósito** y viendo que
