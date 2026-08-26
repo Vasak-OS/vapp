@@ -1,5 +1,6 @@
 import { getIconSource } from '@vasakgroup/plugin-vicons';
 import { setupContextMenu } from '@vasakgroup/plugin-vsk-contextual-menu';
+import { captureFailures } from '@vasakgroup/plugin-vsk-journal';
 import I18n from '@vasakgroup/tauri-plugin-i18n';
 import { createPinia } from 'pinia';
 import { createApp } from 'vue';
@@ -67,6 +68,15 @@ document.addEventListener('securitypolicyviolation', (evento) => {
 			`«${evento.violatedDirective}» en ${origen}:${evento.lineNumber}`
 	);
 });
+
+// Lo que rompe la interfaz va al diario del sistema, con el nombre de esta
+// aplicación. Antes no iba a ninguna parte: un error de JavaScript deja la
+// pantalla a medias y no queda registro de por qué, y la consola del WebView no
+// la ve nadie en una máquina instalada.
+//
+// Va lo más arriba posible, antes de armar la aplicación, para que también
+// atrape lo que falle durante el arranque.
+captureFailures();
 
 // El clic derecho abre el menú de VasakOS —el mismo de todo el escritorio— y no
 // el del motor del navegador, que ofrece «Recargar» e «Inspeccionar elemento».
