@@ -32,6 +32,7 @@ tauri-plugin-shell = "2"
 
 # Para la ventana sin decoración: la barra propia necesita mover y redimensionar.
 gtk = "0.18"
+tauri-plugin-vsk-journal = "2"
 
 [dev-dependencies]
 # Sólo para el test que valida los catálogos de idioma: el plugin los parsea en
