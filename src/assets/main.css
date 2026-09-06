@@ -243,7 +243,16 @@ body * {
  * Va con `:where()` para que tenga especificidad cero: cualquier componente que
  * quiera su propio indicador lo pisa sin peleas, y esto queda como piso.
  */
-:where(a, button, input, select, textarea, summary, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible {
+:where(
+  a,
+  button,
+  input,
+  select,
+  textarea,
+  summary,
+  [role="button"],
+  [tabindex]:not([tabindex="-1"])
+):focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
@@ -259,6 +268,12 @@ body * {
  * `transitionend` y `animationend`, que hay código que espera. Y `iteration-count: 1`
  * es lo que detiene lo infinito, que es la parte que de verdad marea.
  */
+/* biome-ignore-start lint/complexity/noImportantStyles: acá `!important` es la
+   regla, no la excepción. Lo que hay que pisar son las transiciones que cada
+   componente declara con utilidades de Tailwind, que tienen más especificidad
+   que un selector universal: sin `!important` esta preferencia no gana ninguna
+   y la persona que la pidió sigue viendo todo moverse. Es además lo que hace
+   la propia hoja de reinicio de Tailwind y lo que recomienda WCAG 2.3.3. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -269,3 +284,4 @@ body * {
     scroll-behavior: auto !important;
   }
 }
+/* biome-ignore-end lint/complexity/noImportantStyles: fin del bloque de movimiento. */
