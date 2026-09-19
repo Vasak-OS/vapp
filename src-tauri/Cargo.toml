@@ -1,6 +1,6 @@
 [package]
 name = "vapp"
-version = "0.1.1"
+version = "0.2.0"
 description = "A Vasak Application (template)"
 authors = ["Vasak Group", "Joaquin (Pato) Decima"]
 edition = "2021"
