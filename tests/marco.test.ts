@@ -47,11 +47,19 @@ describe('el marco', () => {
 		expect(ventana.findAll('.rounded-corner-window').length).toBe(1);
 	});
 
-	test('lleva los tres botones, que es lo normal en una aplicación', () => {
-		// Una ventana que no sea normal —un cuadro de diálogo, el instalador—
-		// le pasa `:controls="[]"` al marco. La plantilla no es ese caso: si
-		// naciera sin botones, toda aplicación nueva arrancaría sin ellos y
-		// habría que acordarse de encenderlos.
+	test('lleva los tres botones, con su nombre traducido', () => {
+		// Dos cosas en una lectura, porque es una sola línea de la plantilla la
+		// que puede romper las dos: qué botones hay, y cómo se llaman.
+		//
+		// Los botones: una ventana que no sea normal —un cuadro de diálogo, el
+		// instalador— le pasa `:controls="[]"` al marco. La plantilla no es ese
+		// caso: si naciera sin ellos, toda aplicación nueva arrancaría sin
+		// botones y habría que acordarse de encenderlos.
+		//
+		// Los nombres: sin pasarlos salen en inglés, que son los valores por
+		// omisión de la librería. Es el nombre accesible y no un texto a la
+		// vista, así que lo único que lo dice es el lector de pantalla y nadie
+		// lo ve al mirar la ventana.
 		const ventana = abrir();
 
 		expect(
