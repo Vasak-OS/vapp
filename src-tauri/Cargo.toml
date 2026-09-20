@@ -1,6 +1,6 @@
 [package]
 name = "vapp"
-version = "0.2.5"
+version = "0.2.6"
 description = "A Vasak Application (template)"
 authors = ["Vasak Group", "Joaquin (Pato) Decima"]
 edition = "2021"
@@ -13,6 +13,23 @@ edition = "2021"
 # This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
 name = "vapp_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
+
+# Para abrir la ventana compilada sin el servidor de desarrollo detrás.
+#
+# En depuración y sin esto, el WebView carga el `devUrl` de `tauri.conf.json`:
+# si no hay nada sirviendo ahí, la ventana abre **vacía**, sin error, sin
+# registro y sin nada que mirar. Es de los que cuestan media hora la primera vez
+# que pasan.
+#
+# El nombre corto es el que documenta Tauri y el que usa el resto del
+# escritorio, pero un rasgo de una dependencia no existe como rasgo propio hasta
+# que el paquete lo reexporta: sin esta línea, `cargo build --features
+# custom-protocol` responde «the package does not contain this feature». Lo
+# calificado —`--features tauri/custom-protocol`— anda igual sin declarar nada,
+# y es lo que el CLI de Tauri pasa por su cuenta al hacer `tauri build`; esto es
+# para quien compila con cargo a mano.
+[features]
+custom-protocol = ["tauri/custom-protocol"]
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
