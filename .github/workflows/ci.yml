@@ -19,3 +19,12 @@ jobs:
     permissions:
       contents: read
     uses: Vasak-OS/.github/.github/workflows/app.yml@main
+    with:
+      # El guardia de bibliotecas propias corta acá en vez de sólo avisar.
+      #
+      # En la plantilla importa el doble que en cualquier otro repositorio: esto
+      # se copia con cada aplicación nueva, así que la que nazca de acá nace ya
+      # con el corte encendido y no puede quedarse atrás en silencio — que es
+      # exactamente como se quedaron las diecisiete en la 0.7 de la librería,
+      # durante ocho versiones y sin que nada fallara.
+      bibliotecas_cortan: true
