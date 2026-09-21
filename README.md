@@ -143,8 +143,25 @@ salen de variables CSS (`--use-*`), no de valores fijos.
 
 ### Iconos
 
-`useReactiveIcon()` en `src/composables/`. Reactivo porque el pack de iconos
-puede cambiar en caliente.
+`ThemeIcon` de `@vasakgroup/vue-libvasak`, siempre por **nombre** y nunca por
+ruta: el pack de iconos cambia en caliente y sus rutas no son estables.
+
+```vue
+<ThemeIcon name="internet-mail" :size="24" :alt="t('app.nombre')" />
+<ThemeIcon name="view-refresh" type="symbol" :size="16" />
+```
+
+`type` elige la variante: `icon` la común en color —la identidad de la ventana—
+y `symbol` la monocroma, que es la de los botones de acción. El `alt` va vacío
+por omisión, para cuando el icono acompaña a un texto que ya dice lo mismo;
+cuando el icono **es** la etiqueta, se pasa.
+
+La plantilla traía acá su propio `useReactiveIcon()`, y de ahí salieron nueve
+copias de noventa y una líneas repartidas por el taller. Todas resolvían el
+icono y se suscribían al cambio de tema **una vez por instancia**: en una
+ventana con veintiséis iconos eso eran veintiséis oyentes y veintiséis llamadas
+al backend. El de la librería memoriza lo resuelto y usa un solo oyente para
+todas.
 
 ---
 
@@ -230,8 +247,6 @@ src/
   App.vue                 tema y configuración; el marco de la ventana
   main.ts                 plugins, CSP, i18n, menú contextual
   assets/main.css         Tailwind y las variables del tema
-  components/topbar/      la barra de título propia (la ventana no tiene decoración)
-  composables/            useReactiveIcon y compañía
   layouts/                WindowAppLayout
   tools/interpolar.ts     interpolación y plurales de textos traducidos
 tests/                    tests del frontend (bun test)
