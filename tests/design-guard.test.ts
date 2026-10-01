@@ -377,3 +377,59 @@ describe('lo que la forma de Once UI deja afuera', () => {
 		]);
 	});
 });
+
+describe('el piso del esquema se lee', () => {
+	/**
+	 * Los valores de `:root` rigen hasta que el config-manager escribe los del
+	 * esquema de la persona, y son los que quedan si esa lectura falla. El
+	 * diálogo de permisos, que nació de una plantilla anterior, tenía
+	 * `--text-on-primary-dark: #cdd6f4`: «Permitir» salía lavanda sobre rosa,
+	 * 1,4:1, hasta que cargaba la configuración.
+	 */
+	function luminance(hex: string): number {
+		const value = hex.replace('#', '');
+		const full = value.length === 3 ? [...value].map((c) => c + c).join('') : value;
+		const [r, g, b] = [0, 2, 4].map((i) => {
+			const channel = Number.parseInt(full.slice(i, i + 2), 16) / 255;
+			return channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+		});
+		return 0.2126 * (r as number) + 0.7152 * (g as number) + 0.0722 * (b as number);
+	}
+
+	function contrast(a: string, b: string): number {
+		const [light, dark] = [luminance(a), luminance(b)].sort((x, y) => y - x) as [number, number];
+		return (light + 0.05) / (dark + 0.05);
+	}
+
+	async function floor(): Promise<Record<string, string>> {
+		const css = await read(APP_CSS);
+		const root = css.slice(css.indexOf(':root {'), css.indexOf('}', css.indexOf(':root {')));
+		return Object.fromEntries([...root.matchAll(/--([a-z0-9-]+)\s*:\s*(#[0-9a-fA-F]{3,6})\s*;/g)].map((m) => [m[1], m[2]]));
+	}
+
+	for (const mode of ['', '-dark']) {
+		test(`el texto llega a 4,5:1 sobre su fondo${mode ? ' en oscuro' : ' en claro'}`, async () => {
+			const colors = await floor();
+			const pairs: Array<[string, string]> = [
+				['text-on-primary', 'primary'],
+				['text-main', 'ui-background'],
+				['text-muted', 'ui-background'],
+				['text-main', 'ui-surface'],
+			];
+			for (const [text, background] of pairs) {
+				const fg = colors[text + mode];
+				const bg = colors[background + mode];
+				expect(fg, `falta --${text}${mode}`).toBeDefined();
+				expect(bg, `falta --${background}${mode}`).toBeDefined();
+				expect(contrast(fg as string, bg as string), `--${text}${mode} sobre --${background}${mode}`).toBeGreaterThanOrEqual(4.5);
+			}
+		});
+	}
+
+	test('y el contorno de un control, 3:1 contra el fondo', async () => {
+		const colors = await floor();
+		for (const mode of ['', '-dark']) {
+			expect(contrast(colors[`ui-border-strong${mode}`] as string, colors[`ui-background${mode}`] as string)).toBeGreaterThanOrEqual(3);
+		}
+	});
+});
