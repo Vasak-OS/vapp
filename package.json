@@ -15,6 +15,7 @@
   },
   "vasak": {
     "bibliotecasAtrasadas": {
+      "pinia": "La 4 es un salto mayor de una biblioteca que usa el taller entero: el resto de las aplicaciones está en pinia 3, y la plantilla en la 4 haría nacer cada aplicación nueva con un vocabulario distinto del de las demás. Va en su propio PR, coordinado con el resto. config-manager 2.9 acepta las dos, así que ya no frena a nadie.",
       "typescript": "La 7 es el compilador nativo y no expone la API de JavaScript que lee vue-tsc 3: `vue-tsc --noEmit` se cae con ERR_PACKAGE_PATH_NOT_EXPORTED antes de mirar un archivo. El rango ^5.9.3 no alcanza la 7. Se sube cuando vue-tsc publique soporte para TypeScript 7."
     }
   },
@@ -28,7 +29,7 @@
     "@vasakgroup/plugin-vsk-journal": "^2.0.1",
     "@vasakgroup/tauri-plugin-i18n": "^2.3.1",
     "@vasakgroup/vue-libvasak": "^2.0.0",
-    "pinia": "^4.0.3",
+    "pinia": "^3.0.4",
     "vue": "^3.5.43"
   },
   "devDependencies": {
