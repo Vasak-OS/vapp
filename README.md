@@ -141,6 +141,41 @@ elemento» — visiblemente ajeno al escritorio.
 `config-changed` para que el cambio de tema se aplique sin reiniciar. Los colores
 salen de variables CSS (`--use-*`), no de valores fijos.
 
+### Componentes y forma
+
+Los botones, campos, tarjetas, menús, pestañas, globos y diálogos salen de
+`@vasakgroup/vue-libvasak`; una aplicación no dibuja los suyos. Si falta uno, se
+suma **a la librería**, con sus pruebas, y la aplicación lo consume
+(vue-libvasak#74, decisión 8 del taller).
+
+La forma —radios, bordes finos, sombras, estados, tiempos— viene de
+`@vasakgroup/vue-libvasak/tokens.css`, que `main.css` importa justo después de
+Tailwind. De ahí salen:
+
+- los radios `rounded-corner-xs`, `-s`, `-m`, `-l`, `-xl`, `-full` y `-window`,
+  todos derivados del radio que eligió la persona. Ni `rounded-md` ni un
+  `border-radius` en píxeles, ni los alias viejos `rounded-corner` y
+  `rounded-corner-sm`;
+- los bordes `ui-line-weak` / `ui-line`, los velos `ui-hover`, `ui-pressed`,
+  `ui-selected`, la superficie `ui-float` y el anillo `ui-focus`;
+- las sombras `shadow-surface-*`, los roles de texto `text-label-*`,
+  `text-body-*`, `text-heading-*` y las curvas `ease-ui` / `ease-ui-out`.
+
+Los colores salen sólo del esquema: ni hexadecimales, ni `rgb()`, ni la paleta
+de Tailwind (`gray-200`), ni siquiera en una sombra. Un tono derivado es un
+`color-mix()` sobre las variables del esquema. Los paneles y tarjetas van en
+`bg-ui-surface/70`; `bg-ui-bg` es sólo el fondo de la ventana. Sin
+`backdrop-blur`: las superficies son opacas.
+
+Lo que cambia con el ancho va con consultas de contenedor (`@container`,
+`@sm:`) o un `ResizeObserver`, **nunca** con `sm:`/`md:` ni `matchMedia`: un
+componente no sabe en qué ventana vive, y en WebKitGTK ni `matchMedia` ni
+`resize` avisan.
+
+`tests/design-guard.test.ts` hace cumplir todo esto y falla con el archivo y la
+clase culpable. Viene encendida en la plantilla para que cada aplicación nazca
+con ella.
+
 ### Iconos
 
 `ThemeIcon` de `@vasakgroup/vue-libvasak`, siempre por **nombre** y nunca por
@@ -178,6 +213,8 @@ la interfaz.
 La plantilla trae los dos lados armados:
 
 - `tests/interpolar.test.ts` — la interpolación, con los tres casos del `$`.
+- `tests/design-guard.test.ts` — la guardia del diseño: colores del esquema,
+  radios del sistema, iconos del tema, sin puntos de corte de la pantalla.
 - `src-tauri/tests/locales.rs` — que los catálogos parseen, tengan las mismas
   claves, ningún texto vacío y los marcadores coincidan. Recorre el árbol
   **completo**: cuando sólo bajaba dos niveles, un grupo anidado más abajo quedaba
@@ -246,7 +283,7 @@ hilo con el dibujado. Un cálculo de 30 ms son dos cuadros perdidos.
 src/
   App.vue                 tema y configuración; el marco de la ventana
   main.ts                 plugins, CSP, i18n, menú contextual
-  assets/main.css         Tailwind y las variables del tema
+  assets/main.css         Tailwind, `tokens.css` de la librería y las variables del tema
   layouts/                WindowAppLayout
   tools/interpolar.ts     interpolación y plurales de textos traducidos
 tests/                    tests del frontend (bun test)
