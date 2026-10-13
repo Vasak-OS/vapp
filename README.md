@@ -1,301 +1,375 @@
-# vapp — plantilla de aplicaciones de VasakOS
+# Vapp
 
-Punto de partida para una aplicación del escritorio: Tauri 2 + Vue 3 +
-TypeScript + Tailwind 4, con los cuatro plugins de VasakOS ya enchufados y con
-las decisiones que las aplicaciones reales tuvieron que aprender rompiéndose.
-
-**Lo que hay acá no es andamiaje de relleno.** Cada pieza está porque su ausencia
-causó un bug concreto en `vasak-resonance`, `vasak-terminal`, `vasak-gallery` o
-`vasak-desktop`. Los comentarios del código dicen cuál.
+Un template de Tauri creado para las Aplicaciones de VasakOS, cuenta con un stack completo en bun y los plugins para los themes de VasakOS
 
 ---
 
-## Arrancar una aplicación nueva
+## Tecnología
 
-```bash
-git clone https://github.com/Vasak-OS/vapp mi-app && cd mi-app && rm -rf .git && git init
+[![Rust](https://img.shields.io/badge/Rust-1.82%2B-orange?style=flat&logo=rust)](https://www.rust-lang.org/) [![Tauri](https://img.shields.io/badge/Tauri-2.0-24283b?style=flat&logo=tauri)](https://tauri.app/) [![Vue](https://img.shields.io/badge/Vue-3.5-42b883?style=flat&logo=vue.js)](https://vuejs.org/) [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178c6?style=flat&logo=typescript)](https://www.typescriptlang.org/)
+
+## Estado
+
+[![CI](https://github.com/Vasak-OS/vapp/actions/workflows/ci.yml/badge.svg)](https://github.com/Vasak-OS/vapp/actions/workflows/ci.yml)
+[![Versión](https://img.shields.io/github/v/release/Vasak-OS/vapp?style=flat&label=Versi%C3%B3n)](https://github.com/Vasak-OS/vapp/releases)
+[![Licencia](https://img.shields.io/github/license/Vasak-OS/vapp?style=flat)](LICENSE)
+[![Cobertura](https://sonarcloud.io/api/project_badges/measure?project=Vasak-OS_vapp&metric=coverage&style=flat)](https://sonarcloud.io/summary/new_code?id=Vasak-OS_vapp)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=Vasak-OS_vapp&metric=alert_status&style=flat)](https://sonarcloud.io/summary/new_code?id=Vasak-OS_vapp)
+[![Tamaño repo](https://img.shields.io/github/repo-size/Vasak-OS/vapp?style=flat)](https://github.com/Vasak-OS/vapp)
+
+---
+
+## Descripción
+
+Un template de Tauri creado para las Aplicaciones de VasakOS, cuenta con un stack completo en bun y los plugins para los themes de VasakOS
+
+**Para el usuario:** Un template de Tauri creado para las Aplicaciones de VasakOS, cuenta con un stack completo en bun y los plugins para los themes de VasakOS
+
+**Integración VasakOS:** Integra con el ecosistema VasakOS vía D-Bus y configuración compartida.
+
+---
+
+## Arquitectura (diagramas)
+
+> Copia y pega la plantilla que necesites, descomenta y adapta.
+
+### Flujo de datos
+
+```mermaid
+graph TD
+    A[Entrada: Teclado / Ratón / D-Bus / Sistema] --> B[Procesamiento: Core Rust + Tauri Commands]
+    B --> C[Salida: UI actualizada / Acciones del sistema]
+    style A fill:#e1f5fe
+    style C fill:#e8f5e9
 ```
 
-Después, cambiar el nombre en **cinco lugares** —y son cinco, no uno:
+### Componentes internos
 
-| archivo | qué cambiar |
-|---|---|
-| `package.json` | `name` |
-| `src-tauri/Cargo.toml` | `name`, `[lib] name` (`mi_app_lib`), `description` |
-| `src-tauri/tauri.conf.json` | `productName`, `identifier` (`ar.net.vasak.mi-app`) |
-| `index.html` | `<title>` |
-| `src-tauri/src/main.rs` | la llamada a `mi_app_lib::run()` |
+```mermaid
+flowchart LR
+    subgraph App[Vapp]
+        UI[Frontend Vue 3 + vue-libvasak]
+        Core[Core Rust: panel, overview, notifications, media]
+        IPC[Tauri Commands / Eventos]
+    end
+    UI --> IPC
+    IPC --> Core
+    Core --> DBus[(D-Bus / zbus)]
+    Core --> System[Systemd --user / D-Bus / Wayfire IPC / PipeWire]
+    style UI fill:#f3e5f5
+    style Core fill:#e3f2fd
+    style DBus fill:#fff3e0
+    style System fill:#fce4ec
+```
 
-El `identifier` decide dónde van la configuración y los datos del usuario:
-cambiarlo después de la primera ejecución deja huérfano lo que ya se guardó.
+### Integración en el sistema VasakOS
 
-Y **verificá que los tests pasen antes de escribir nada**: si el `name` quedó a
-medio cambiar, el test de catálogos lo dice enseguida.
-
-```bash
-bun install
-bun test                                   # frontend
-cargo test --manifest-path src-tauri/Cargo.toml   # backend
-bunx --bun tauri dev
+```mermaid
+C4Context
+    title Vapp en VasakOS
+    Person(usuario, "Usuario", "Persona que usa el sistema")
+    System_Boundary(c1, "VasakOS") {
+        System(app, "Vapp", "Un template de Tauri creado para las Aplicaciones de VasakOS, cuenta con un stac")
+        System_Ext(settings, "vasak-settings", "Configuración central")
+        System_Ext(keyring, "vasak-keyring", "Secrets y claves")
+        System_Ext(accounts, "vasak-accounts", "Cuentas e identidad")
+        System_Ext(permissions, "vasak-permissions", "Permisos y portales")
+    }
+    System_Ext(systemd, "systemd --user", "Activación por socket D-Bus")
+    System_Ext(dbus, "D-Bus sesión", "Bus de mensajes")
+    System_Ext(wayland, "Wayland / Wayfire", "Compositor + plugins")
+    System_Ext(pipewire, "PipeWire", "Control de medios MPRIS")
+    Rel(usuario, app, "Usa")
+    Rel(app, settings, "Lee/escribe config")
+    Rel(app, keyring, "Guarda/lee secrets")
+    Rel(app, accounts, "Identidad de cuenta")
+    Rel(app, permissions, "Solicita permisos")
+    Rel(app, systemd, "Socket-activated via D-Bus")
+    Rel(app, dbus, "Expone interfaces D-Bus")
+    Rel(app, wayland, "Wayfire IPC: workspaces, ventanas")
+    Rel(app, pipewire, "MPRIS: metadatos y controles")
 ```
 
 ---
 
-## Lo que ya viene resuelto, y por qué
+## Instalación
 
-### El marco de la ventana
-
-`WindowAppLayout` recibe el contenido en un `slot`, así que la aplicación va
-adentro:
-
-```vue
-<WindowAppLayout>
-  <MiContenido />
-</WindowAppLayout>
-```
-
-Sin ese `slot` —que es como estaba— el layout **descartaba en silencio** todo lo
-que se le pusiera dentro y la ventana abría vacía con el relleno de la plantilla
-todavía puesto. No hay ningún error: simplemente no aparece nada, y en
-vasak-monitor costó una compilación y una captura darse cuenta.
-
-### Idioma de la sesión
-
-`src-tauri/src/locales.rs` resuelve dos cosas que se rompen calladas:
-
-**Dónde están los catálogos.** El plugin sólo prueba rutas relativas al
-ejecutable y al directorio de trabajo, y **ninguna existe cuando el binario está
-en `/usr/bin`**. Sin la ruta explícita, un paquete instalado muestra las claves
-crudas (`inicio.titulo`) en lugar de los textos. Le pasó al gestor de archivos, a
-la terminal y a la galería.
-
-Al empaquetar, el PKGBUILD tiene que instalar los `.yml`:
+### Arch Linux (repo oficial)
 
 ```bash
-install -dm755 "${pkgdir}/usr/share/${pkgname}/locales"
-install -Dm644 "$srcdir/$pkgname/src-tauri/locales/"*.yml \
-    "${pkgdir}/usr/share/${pkgname}/locales/"
+pacman -S vasak-vapp
 ```
 
-**Qué idioma usar.** Se recorren `LC_ALL`, `LC_MESSAGES` y `LANG` en ese orden,
-**salteando las vacías**: `LC_ALL=""` junto a `LANG=en_US.UTF-8` es una máquina en
-inglés, y quedarse con la vacía la dejaría en español.
+### Debian / Ubuntu (.deb)
 
-### Escribir textos traducidos
-
-Todo texto que ve una persona va en los `.yml`. Nunca una cadena literal en un
-`.vue`.
-
-El `t()` del plugin toma **un solo argumento y no interpola**. La convención es el
-marcador `{0}` y `src/tools/interpolar.ts`:
-
-```ts
-import { interpolar } from '@/tools/interpolar';
-interpolar(t('inicio.saludo'), nombre);
+```bash
+wget https://github.com/Vasak-OS/vapp/releases/download/v{{VERSION}}/vasak-vapp_{{VERSION}}_amd64.deb
+sudo apt install ./vasak-vapp_{{VERSION}}_amd64.deb
 ```
 
-**Usá el ayudante, no `replace` a mano.** `String.prototype.replace` interpreta
-`$&`, `$$`, `` $` `` y `$'` en la cadena de reemplazo: una canción llamada
-«Rock $& Roll» se mostraba como «Rock {0} Roll», y una con `$'` **perdía el texto
-que venía después**. Hay tests con los tres casos.
+### Desde fuente
 
-Y no hay plurales: van dos claves con sufijo `One`/`Other` y la vista elige con
-`claveSegunCantidad()`. Sin eso se termina mostrando «1 pistas».
+```bash
+git clone https://github.com/Vasak-OS/vapp.git
+cd vapp
 
-Dos reglas de los `.yml`, las dos con test:
+# Desarrollo (recarga en caliente frontend + backend)
+bun run dev
 
-1. **Si el valor contiene `: `, va entre comillas.** Sin ellas el parser lo lee
-   como un mapeo anidado, rompe el archivo entero y el plugin **paniquea al
-   arrancar**: la aplicación no abre. Pasó en producción.
-2. **Los idiomas tienen las mismas claves y los mismos marcadores.** Una clave que
-   falta se muestra cruda; un `{0}` que está en uno y no en el otro pierde el
-   dato.
-
-### Política de contenido
-
-`tauri.conf.json` trae una CSP con `script-src 'self'`, que es lo que bloquea la
-inyección de script. Si tu aplicación necesita algo más —una API externa en
-`connect-src`, `blob:` en `img-src`— agregalo ahí, **no la aflojes entera**.
-
-`style-src` lleva `'unsafe-inline'` a propósito: Vue escribe estilos en línea con
-`:style` y Tailwind inyecta los suyos. Esta política cubre script, no estilo.
-
-`main.ts` registra un reportador de violaciones. Hace falta porque **una violación
-de CSP no se ve**: el recurso no carga y la interfaz queda a medias sin decir
-nada. El reportador sanea las URLs antes de escribirlas —credenciales, query y
-fragmento fuera— porque ahí viajan tokens.
-
-Cuidado con las rutas absolutas de archivos: `file://` **no** está permitido, y
-está bien que no lo esté. Usá `convertFileSrc()`, que devuelve una URL del
-protocolo de assets.
-
-### Clic derecho
-
-`setupContextMenu({ iconResolver: getIconSource })` en `main.ts`. Sin eso, el
-clic derecho abre el menú del motor del navegador, con «Recargar» e «Inspeccionar
-elemento» — visiblemente ajeno al escritorio.
-
-### Tema y colores
-
-`useConfigStore()` del plugin de configuración, y `App.vue` escucha
-`config-changed` para que el cambio de tema se aplique sin reiniciar. Los colores
-salen de variables CSS (`--use-*`), no de valores fijos.
-
-### Componentes y forma
-
-Los botones, campos, tarjetas, menús, pestañas, globos y diálogos salen de
-`@vasakgroup/vue-libvasak`; una aplicación no dibuja los suyos. Si falta uno, se
-suma **a la librería**, con sus pruebas, y la aplicación lo consume
-(vue-libvasak#74, decisión 8 del taller).
-
-La forma —radios, bordes finos, sombras, estados, tiempos— viene de
-`@vasakgroup/vue-libvasak/tokens.css`, que `main.css` importa justo después de
-Tailwind. De ahí salen:
-
-- los radios `rounded-corner-xs`, `-s`, `-m`, `-l`, `-xl`, `-full` y `-window`,
-  todos derivados del radio que eligió la persona. Ni `rounded-md` ni un
-  `border-radius` en píxeles, ni los alias viejos `rounded-corner` y
-  `rounded-corner-sm`;
-- los bordes `ui-line-weak` / `ui-line`, los velos `ui-hover`, `ui-pressed`,
-  `ui-selected`, la superficie `ui-float` y el anillo `ui-focus`;
-- las sombras `shadow-surface-*`, los roles de texto `text-label-*`,
-  `text-body-*`, `text-heading-*` y las curvas `ease-ui` / `ease-ui-out`.
-
-Los colores salen sólo del esquema: ni hexadecimales, ni `rgb()`, ni la paleta
-de Tailwind (`gray-200`), ni siquiera en una sombra. Un tono derivado es un
-`color-mix()` sobre las variables del esquema. Los paneles y tarjetas van en
-`bg-ui-surface/70`; `bg-ui-bg` es sólo el fondo de la ventana. Sin
-`backdrop-blur`: las superficies son opacas.
-
-Lo que cambia con el ancho va con consultas de contenedor (`@container`,
-`@sm:`) o un `ResizeObserver`, **nunca** con `sm:`/`md:` ni `matchMedia`: un
-componente no sabe en qué ventana vive, y en WebKitGTK ni `matchMedia` ni
-`resize` avisan.
-
-`tests/design-guard.test.ts` hace cumplir todo esto y falla con el archivo y la
-clase culpable. Viene encendida en la plantilla para que cada aplicación nazca
-con ella.
-
-### Iconos
-
-`ThemeIcon` de `@vasakgroup/vue-libvasak`, siempre por **nombre** y nunca por
-ruta: el pack de iconos cambia en caliente y sus rutas no son estables.
-
-```vue
-<ThemeIcon name="internet-mail" :size="24" :alt="t('app.nombre')" />
-<ThemeIcon name="view-refresh" type="symbol" :size="16" />
+# Build producción
+bun run build
 ```
 
-`type` elige la variante: `icon` la común en color —la identidad de la ventana—
-y `symbol` la monocroma, que es la de los botones de acción. El `alt` va vacío
-por omisión, para cuando el icono acompaña a un texto que ya dice lo mismo;
-cuando el icono **es** la etiqueta, se pasa.
+### Flatpak / AppImage
 
-La plantilla traía acá su propio `useReactiveIcon()`, y de ahí salieron nueve
-copias de noventa y una líneas repartidas por el taller. Todas resolvían el
-icono y se suscribían al cambio de tema **una vez por instancia**: en una
-ventana con veintiséis iconos eso eran veintiséis oyentes y veintiséis llamadas
-al backend. El de la librería memoriza lo resuelto y usa un solo oyente para
-todas.
+> *Placeholder: añadir cuando exista paquete Flatpak o AppImage oficial.*
 
 ---
 
-## Tests
+## Uso rápido
 
-**Cada cambio va con tests, en el mismo commit.** Y si el repo tiene poca
-cobertura, se suman algunos de lo que está alrededor: así sube mientras se
-avanza, en lugar de necesitar una campaña de testing que nunca llega.
+```bash
+# Se lanza automáticamente al iniciar la sesión Wayfire (systemd --user)
+# Para lanzar manualmente:
+vapp
+```
 
-Lo que conviene probar es **lo que se rompe callado**: parsers, recortes de
-texto, límites, entradas mal formadas, plurales, marcadores de interpolación. No
-la interfaz.
+### Atajos / flags principales
 
-La plantilla trae los dos lados armados:
+| Acción | Comando / Tecla |\n|--------|-----------------|\n| Acción principal | `vapp` |\n| Configuración | `vapp --config` |\n| Ayuda | `vapp --help` |
 
-- `tests/interpolar.test.ts` — la interpolación, con los tres casos del `$`.
-- `tests/design-guard.test.ts` — la guardia del diseño: colores del esquema,
-  radios del sistema, iconos del tema, sin puntos de corte de la pantalla.
-- `src-tauri/tests/locales.rs` — que los catálogos parseen, tengan las mismas
-  claves, ningún texto vacío y los marcadores coincidan. Recorre el árbol
-  **completo**: cuando sólo bajaba dos niveles, un grupo anidado más abajo quedaba
-  sin comprobar y encima aparecía como texto vacío, porque un mapeo no es una
-  cadena — el test fallaba justo donde no miraba.
-- `src-tauri/src/locales.rs` — la detección de idioma.
-
-**Verificá que un test sirve reintroduciendo el bug a propósito** y viendo que
-falle. Un test que pasa siempre no prueba nada.
-
-Dos trampas al extraer lógica para poder probarla:
-
-- Separá el parseo de la I/O. Ese refactor es el que suele destapar el bug —así
-  apareció un panic por recortar UTF-8 por bytes en la terminal.
-- No dejes un `catch` vacío. Tragarse el error hace imposible saber si la llamada
-  llegó, y cuesta horas de diagnóstico.
+> **Captura:** `assets/demo.gif` *(placeholder — sustituir por GIF real)*
 
 ---
 
-## Compilar y empaquetar
+## Configuración
+
+### Archivo de configuración
+
+```
+~/.config/vasak/vapp.toml
+```
+
+Ejemplo mínimo:
+
+```toml
+[panel]
+position = "top"
+height = 36
+autohide = false
+
+[overview]
+blur_background = true
+show_recent = true
+max_recent = 8
+
+[notifications]
+position = "right"
+width = 360
+max_visible = 10
+
+[media]
+show_artwork = true
+preferred_players = ["spotify", "firefox", "mpv"]
+```
+
+### Variables de entorno
+
+| Variable | Descripción | Por defecto |
+|----------|-------------|-------------|
+| `VASAK_DEBUG` | Activa logs de depuración en consola | `false` |
+| `VASAK_PROFILE` | Perfil de rendimiento: balanced, performance, power-save | `balanced` |
+
+### Integración con `tauri-plugin-config-manager`
+
+- Esquemas de color: respeta `--ui-primary`, `--ui-surface`, `--ui-focus`, `--ui-on-surface`, `--ui-border`\n- Tema de iconos: usa el tema del sistema (`vasakos-icon-theme`) vía `vicon` lookup\n- Radio de bordes: variable CSS `--ui-radius` del esquema activo (por defecto 12px)\n- Fuentes: `--ui-font-family`, `--ui-font-size-base` desde el esquema
+
+---
+
+## Desarrollo
+
+### Requisitos
+
+- **Rust:** `rustup` toolchain estable (`rust-toolchain.toml` fija la versión)
+- **Node / bun:** `bun` ≥ 1.1 (nunca npm/yarn/pnpm para apps Tauri)
+- **Sistema:** `pkg-config`, `libgtk-3-dev`, `libwebkit2gtk-4.1-dev`, `libssl-dev`
+- *`libgtk-layer-shell-dev`, `wayland-protocols`, `wayfire-dev` para Wayland*
+
+### Dependencias de desarrollo
+
+#### Sistema (paquetes Arch / Debian / Fedora)
+
+`base-devel`, `pkgconf`, `libssl-dev`, `libwebkit2gtk-4.1-dev`, `libgtk-3-dev`, `libayatana-appindicator3-dev`, `librsvg2-dev`, `gstreamer1.0-plugins-base`, `gstreamer1.0-plugins-good`, `libpipewire-0.3-dev`, `libwireplumber-0.5-dev`, `libdbus-1-dev`, `libudev-dev`, `libxkbcommon-dev`, `libwayland-dev`, `meson`, `ninja`, `clang`, `lld`
+
+#### Rust
+
+`rustup` → `stable` + `rustfmt` + `clippy`
+
+#### Node
+
+**Solo `bun`** (nunca npm/yarn/pnpm para apps Tauri). `bun --version` ≥ 1.1
+
+#### Herramientas CLI
+
+`just` (command runner), `cargo-binstall` (opcional), `cargo-llvm-cov` (para cobertura)
+
+### Correr en desarrollo
 
 ```bash
-bun run lint          # biome
+# Frontend (Vite dev server + Tauri dev)
+bun run tauri dev
+
+# Solo frontend (Vite)
+bun run dev
+
+# Solo backend (cargo watch)
+cargo watch -x "run --bin vapp`
+```
+
+### Compilar / Build de release
+
+```bash
+# Build completo (frontend + backend + bundle)
+bun run tauri build
+
+# Solo frontend (para testear bundle después)
+bun run build
+
+# Solo backend Rust (binario optimizado)
+cargo build --release --locked
+
+# Paquetes nativos
+# Arch: makepkg -sf en PKGBUILDS/vapp/
+# Debian: cargo deb --no-build --target-dir src-tauri/target/release/debian
+```
+
+### Targets principales
+
+```bash
+# Desarrollo
+bun run dev
+
+# Build producción
+bun run build
+
+# Solo frontend
+bun run build:frontend
+
+# Solo backend Rust
+cargo build --release --locked
+
+# Lint + tipos (pre-commit / CI)
+bunx --bun biome check .\nbunx vue-tsc --noEmit\ncargo fmt --check
+```
+
+### Pruebas
+
+```bash
+# Suite completa JS (Vitest via bun:test)
 bun test
-cargo test --manifest-path src-tauri/Cargo.toml
-bunx --bun tauri build
+
+# Suite completa Rust (crates en pruebas_rust del CI)
+cargo test -p vapp-core -p vapp-ui --locked
+
+# Integración (requiere Wayfire corriendo)
+cargo test -p vapp-integration --locked -- --ignored
 ```
 
-**Compilá siempre con `tauri build`, nunca con `cargo build --release` a secas.**
-Con `cargo` el binario queda apuntando al servidor de desarrollo: la página
-«carga» vacía, no ejecuta nada de JavaScript, y todo parece roto por otra razón.
-Perdí una tarde con eso.
+### Convención de commits
 
-El PKGBUILD necesita, además de los `.yml` de arriba:
+[Conventional Commits](https://www.conventionalcommits.org/es/v1.0.0/):
 
-- `options=('!lto')` — makepkg inyecta `-flto` global y los crates que compilan C
-  o assembly emiten bitcode que el enlazador de rustc no resuelve. Cargo ya hace
-  su propio LTO.
-- `RUSTFLAGS="-C target-cpu=x86-64"` y `unset CARGO_ENCODED_RUSTFLAGS` — el
-  `target-cpu=native` de la máquina que compila produce binarios que mueren con
-  SIGILL en cualquier CPU más vieja.
+```
+<tipo>(<ámbito>): <descripción corta>
+
+[cuerpo opcional]
+
+[pie opcional: Closes #N]
+```
+
+Tipos habituales: `feat`, `fix`, `bugfix`, `docs`, `ci`, `chore`, `security`, `refactor`, `perf`, `test`.
+
+### Cómo abrir PR
+
+1. Rama desde `origin/main`:
+   ```bash
+   git worktree add -b feat/{{TEMA}} ~/wt/vapp-{{TEMA}} origin/main
+   ```
+2. Prefijos de rama: `fix/`, `feat/`, `bugfix/`, `docs/`, `ci/`, `chore/`, `security/`
+3. Escribe el fix → **`qa` escribe las pruebas** (fallan sin el fix) → suite verde → abre PR
+4. Al abrir PR, **cuatro cosas obligatorias**:
+   - Asignado a `JoaquinDecima`
+   - Etiqueta `enhancement` o `bug` (+ `ci` / `dependencies` si aplica)
+   - Añadido al proyecto «VasakOS Roadmap»
+   - Status **In Progress**
 
 ---
 
-## Rendimiento: lo que aprendimos a no hacer
+## Arquitectura (texto)
 
-Estas aplicaciones corren en el escritorio de alguien, y su JavaScript comparte
-hilo con el dibujado. Un cálculo de 30 ms son dos cuadros perdidos.
+### Crates / módulos principales
 
-- **No sondees si podés escuchar.** Y si tenés que sondear, pausá con
-  `document.hidden`: nadie lee una pantalla que no está en pantalla.
-- **Un temporizador, no N.** Un `setInterval` por elemento se multiplica sin que
-  se note.
-- **Un reloj sin segundos despierta al minuto**, no a 1 Hz. 59 de cada 60
-  despertares no cambian un píxel, y `toLocaleTimeString` no es gratis.
-- **Lo pesado va en Rust.** Decodificar imágenes o video, hashear, recorrer
-  árboles de archivos: en el backend, y que cruce el IPC una ruta, no los bytes.
-- **No copies para notificar.** Un `{ ...objeto, clave: valor }` sobre un `ref`
-  reactivo copia todo el objeto en cada cambio; asignar la clave ya notifica.
+| Crate / Módulo | Responsabilidad |\n|----------------|-----------------|\n| `vapp-core` | Lógica compartida: estado, D-Bus, IPC |\n| `vapp-ui` | Frontend Vue 3 + componentes vue-libvasak |\n| `vapp-tauri` | Puente Tauri: commands, eventos, WebView |
+
+### Interfaces D-Bus / zbus expuestas
+
+| Interfaz | Métodos / Señales / Propiedades | Descripción |\n|----------|----------------------------------|-------------|\n| `org.vasak.Vapp` | `GetState()`, `StateChanged(dict)`, `SetConfig(dict)` | Estado y control principal |\n| `org.vasak.Vapp.Panel` | `SetPosition(string)`, `SetAutohide(bool)`, `Height(u32)` | Configuración panel en runtime |
+
+### Puntos de extensión
+
+- **Plugins:** Sistema de plugins modular
+- **Hooks:** Hooks de ciclo de vida
+- **API pública Rust:** API pública del crate principal
+
+### Features / Cargo features
+
+| Feature | Descripción | Default |\n|---------|-------------|---------|\n| `system-tray` | Bandeja del sistema + menú contextual | ✓ |\n| `notifications` | Integración libnotify / freedesktop | ✓ |\n| `updater` | Auto-actualización (tauri-plugin-updater) | |\n| `devtools` | DevTools en release (solo debug) | |\n| `experimental-wayland` | Protocolo Wayland inestable | |
+
+Y para apps Tauri+Vue: features del `tauri.conf.json` → `bundle` / `plugins` / `allowlist` (capabilities).
 
 ---
 
-## Estructura
+## Pruebas y calidad
 
-```
-src/
-  App.vue                 tema y configuración; el marco de la ventana
-  main.ts                 plugins, CSP, i18n, menú contextual
-  assets/main.css         Tailwind, `tokens.css` de la librería y las variables del tema
-  layouts/                WindowAppLayout
-  tools/interpolar.ts     interpolación y plurales de textos traducidos
-tests/                    tests del frontend (bun test)
-src-tauri/
-  src/lib.rs              registro de plugins
-  src/locales.rs          resolución de idioma y de la ruta de catálogos
-  locales/{es,en}.yml     los textos
-  tests/locales.rs        validación de los catálogos
-  capabilities/           permisos por ventana
-  tauri.conf.json         ventana, CSP, empaquetado
-```
+- **Cobertura objetivo:** ≥ 80 % del código nuevo (SonarCloud Quality Gate)
+- **Informes:** GitHub Actions → pestaña *SonarCloud Code Analysis* → enlace a SonarCloud
+- **Añadir pruebas:** ver `AGENTS.md` sección 9 (mapa de repos y comandos de prueba)
+- **Regla:** toda corrección lleva prueba escrita por `qa` que falla sin el fix
+
+---
+
+## Contribuir
+
+- **Guía:** [`.github/CONTRIBUTING.md`](https://github.com/Vasak-OS/.github/blob/main/CONTRIBUTING.md)
+- **Plantillas de issue:** [`.github/ISSUE_TEMPLATE/`](https://github.com/Vasak-OS/.github/tree/main/ISSUE_TEMPLATE)
+- **Código de conducta:** [`CODE_OF_CONDUCT.md`](https://github.com/Vasak-OS/.github/blob/main/CODE_OF_CONDUCT.md)
+
+---
+
+## Contribuidores
+
+> **Actualizado automáticamente en CI** — muestra los avatares de quienes han aportado código a este repo.
+
+<div align="center">
+  <a href="https://github.com/JoaquinDecima" target="_blank"><img src="https://avatars.githubusercontent.com/u/11674229?v=4&s=40" width="40" height="40" alt="JoaquinDecima" style="border-radius: 50%; margin: 2px;" title="JoaquinDecima (149 contribuciones)"></a><a href="https://github.com/dependabot[bot]" target="_blank"><img src="https://avatars.githubusercontent.com/in/29110?v=4&s=40" width="40" height="40" alt="dependabot[bot]" style="border-radius: 50%; margin: 2px;" title="dependabot[bot] (3 contribuciones)"></a>
+</div>
+
+[Ver todos los contribuidores](https://github.com/Vasak-OS/vapp/graphs/contributors)
+
+---
+
+## Donadores / Sponsors
+
+[![Sponsors](https://img.shields.io/github/sponsors/Vasak-OS?style=flat&label=Sponsors)](https://github.com/sponsors/Vasak-OS)
+
+> **Backers:** *Actualizado automáticamente en CI desde GitHub Sponsors / OpenCollective / Polar.*
+
+[💖 Donar al proyecto](https://github.com/sponsors/Vasak-OS)
+
+---
 
 ## Licencia
 
-GPL-3.0-or-later.
+`GPL-3.0` — Copyright © 2026 **Vasak-OS Contributors**
+
+[Ver licencia completa](LICENSE)
