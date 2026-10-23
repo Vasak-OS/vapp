@@ -286,6 +286,7 @@ src/
   assets/main.css         Tailwind, `tokens.css` de la librería y las variables del tema
   layouts/                WindowAppLayout
   tools/interpolar.ts     interpolación y plurales de textos traducidos
+  tools/theme-cache.ts    recuerda el tema aplicado; `index.html` lo reaplica antes de montar
 tests/                    tests del frontend (bun test)
 src-tauri/
   src/lib.rs              registro de plugins

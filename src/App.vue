@@ -3,6 +3,7 @@ import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { useConfigStore } from '@vasakgroup/plugin-config-manager';
 import { nextTick, onMounted, onUnmounted, type Ref, ref } from 'vue';
 import WindowAppLayout from '@/layouts/WindowAppLayout.vue';
+import { saveTheme } from '@/tools/theme-cache';
 
 let unListenConfig: Ref<UnlistenFn | null> = ref(null);
 
@@ -22,7 +23,8 @@ onMounted(async () => {
 	const configStore = useConfigStore();
 
 	try {
-		await configStore.loadConfig();
+		// Recordar el tema aplicado para que el próximo arranque no parpadee.
+		await configStore.loadConfig().then(() => saveTheme());
 		configLoading.value = false;
 	} catch (error: any) {
 		configLoading.value = false;
@@ -37,7 +39,7 @@ onMounted(async () => {
 	try {
 		unListenConfig.value = await listen('config-changed', async () => {
 			document.startViewTransition(() => {
-				configStore.loadConfig();
+				configStore.loadConfig().then(() => saveTheme());
 			});
 		});
 	} catch (error: any) {
